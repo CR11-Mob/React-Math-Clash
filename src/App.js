@@ -7,6 +7,11 @@ function App() {
   let interval = null;
   let intervalTime = 3000;
   let isGameOver = false;
+  let clickNumber = 0;
+
+  const minimumNumber = 20;
+  const maximumNumber = 100;
+  const randomMutiplier = maximumNumber - minimumNumber;
 
   const dynamicArray = (size) => {
     let arr = [];
@@ -35,18 +40,28 @@ function App() {
   const [numbers, setNumbers] = useState(gridArr);
   const [grid] = useState(dynamic2DArray(size));
 
-  console.log(numbers);
+  const [target, setTarget] = useState(0);
+
+  const [sum, setSum] = useState(0);
+
+  // console.log(numbers);
 
   const gridElements = () =>
     grid.map((item, index) => (
       <div id={`row-${index}`} key={index}>
         {item.map((item, jndex) => (
-          <div key={jndex}>
+          <div key={jndex} onClick={handleClick}>
             {numbers && numbers[index] && numbers[index][jndex]}
           </div>
         ))}
       </div>
     ));
+
+  const handleClick = (e) => {
+    console.log(e);
+    clickNumber = +e.target.innerText;
+    setSum(clickNumber);
+  };
 
   const randomNumberArr = () => {
     let copyNumbers = [...numbers];
@@ -60,7 +75,7 @@ function App() {
       }
     }
     setNumbers(copyNumbers);
-    console.log(copyNumbers);
+    // console.log(copyNumbers);
   };
 
   const startInterval = () => {
@@ -74,16 +89,25 @@ function App() {
   useEffect(() => {
     randomNumberArr();
     startInterval();
+    let randomTargetNum =
+      minimumNumber + Math.ceil(Math.random() * randomMutiplier);
+
+    setTarget(randomTargetNum);
   }, []);
 
   return (
     <div className="container">
       <div className="main-content">
+        <div className="head">
+          <div className="sum">{sum}</div>
+          <div className="target">{target}</div>
+        </div>
         {grid ? (
           <div className="gameGrid">{gridElements()}</div>
         ) : (
           "Grid Doesn't Exist"
         )}
+        <div className="restart-game"></div>
       </div>
     </div>
   );
