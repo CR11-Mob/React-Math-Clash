@@ -45,3 +45,7 @@ body {
   grid-template-columns: 1fr 1fr;
   place-items: center;
 }
+
+.selectedBox {
+  background-color: red !important;
+}
