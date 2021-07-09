@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import reactDom from "react-dom";
 
 import "./App.css";
 
@@ -41,9 +40,11 @@ function App() {
 
   const [grid, setGrid] = useState(dynamic2DArray(size));
 
-  const [target, setTarget] = useState(20);
+  const [target, setTarget] = useState(0);
 
   const [sum, setSum] = useState(0);
+
+  const [gameIsOver, setGameIsOver] = useState(false);
 
   console.log("---", numbers);
   // console.log("---", numStatus);
@@ -51,6 +52,7 @@ function App() {
   const startInterval = () => {
     interval = setInterval(() => {
       randomNumberArr();
+      gameOver();
     }, intervalTime);
   };
 
@@ -74,7 +76,50 @@ function App() {
       </div>
     ));
 
+  const [timeoutControl, setTimeoutControl] = useState(0);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (gameIsOver) return;
+      console.log({ timeoutControl });
+      let copy = timeoutControl;
+      copy++;
+      setTimeoutControl(copy);
+    }, 5000);
+  }, [timeoutControl]);
+
+  const randomNumberArr = () => {
+    let copyNumbers = [...numbers];
+    let gridCopy = [...grid];
+    // let copyNumStatus = [...numStatus];
+
+    for (let i = 0; i < size; i++) {
+      if (copyNumbers[i].length >= size) {
+        endInterval();
+        isGameOver = true;
+        setGameIsOver(true);
+        console.log({ isGameOver });
+      } else {
+        let randomNum = Math.ceil(Math.random() * 10);
+        copyNumbers[i].unshift(randomNum);
+        gridCopy[i].unshift({ isSelected: false });
+        gridCopy[i].pop();
+      }
+    }
+    setNumbers(copyNumbers);
+    // console.log(copyNumbers);
+  };
+
+  const gameOver = () => {
+    if (isGameOver) {
+      console.log({ isGameOver });
+    }
+    return isGameOver;
+  };
+
   const handleClick = (index, jndex) => {
+    console.log(gameOver());
+    if (gameOver()) return;
     if (!numbers[index][jndex]) return;
 
     let gridCopy = [...grid];
@@ -102,6 +147,7 @@ function App() {
       setSum(clickNumber);
       console.log("WIN");
       deleteNumbers();
+      randomTarget();
     } else if (clickNumber > target) {
       clickNumber = 0;
       setSum(clickNumber);
@@ -122,50 +168,40 @@ function App() {
     }
   };
 
-  const randomNumberArr = () => {
-    let copyNumbers = [...numbers];
-    let gridCopy = [...grid];
-    // let copyNumStatus = [...numStatus];
+  const randomTarget = () => {
+    let randomTargetNum =
+      minimumNumber + Math.ceil(Math.random() * randomMutiplier);
 
-    for (let i = 0; i < size; i++) {
-      if (copyNumbers[i].length >= size) {
-        endInterval();
-        isGameOver = true;
-      } else {
-        let randomNum = Math.ceil(Math.random() * 10);
-        copyNumbers[i].unshift(randomNum);
-        gridCopy[i].unshift({ isSelected: false });
-        gridCopy[i].pop();
-      }
-    }
-    setNumbers(copyNumbers);
-    // console.log(copyNumbers);
+    setTarget(randomTargetNum);
   };
 
   useEffect(() => {
     randomNumberArr();
     startInterval();
-    let randomTargetNum =
-      minimumNumber + Math.ceil(Math.random() * randomMutiplier);
-
-    setTarget(randomTargetNum);
+    randomTarget();
   }, []);
 
   return (
-    <div className="container">
-      <div className="main-content">
-        <div className="head">
-          <div className="sum">{sum}</div>
-          <div className="target">{target}</div>
+    <>
+      {gameIsOver ? (
+        <>Game Over</>
+      ) : (
+        <div className="container">
+          <div className="main-content">
+            <div className="head">
+              <div className="sum">{sum}</div>
+              <div className="target">{target}</div>
+            </div>
+            {grid ? (
+              <div className="gameGrid">{gridElements()}</div>
+            ) : (
+              "Grid Doesn't Exist"
+            )}
+            <div className="restart-game"></div>
+          </div>
         </div>
-        {grid ? (
-          <div className="gameGrid">{gridElements()}</div>
-        ) : (
-          "Grid Doesn't Exist"
-        )}
-        <div className="restart-game"></div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
 
